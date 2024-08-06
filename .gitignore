@@ -1,6 +1,6 @@
 ## Remove not needed files and folders
 
 .venv
-__pychage__
+__pycache__
 .idea
 
