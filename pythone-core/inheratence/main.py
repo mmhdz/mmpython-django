@@ -1,17 +1,12 @@
 from inheratence.model.Employee import Employee
 from inheratence.model.Customer import Customer
-
+from inheratence.model.ManagementSystem import ManagementSystem
 
 
 employee = Employee("EmployeeFirstName", "LastName")
 customer = Customer("IamCustomer", "LastName")
 
-print("Employee data")
-print(employee.pk)
-print(employee.get_full_name_and_type_dict())
-print(employee.get_full_name())
+users_list = [employee, customer]
 
-print("Customer data")
-print(f"Customer id: {customer.pk}")
-print(f"Customer full name and type: {customer.get_full_name_and_type_dict()}")
-print(f"Customer full name: {customer.get_full_name()}")
+management_system = ManagementSystem()
+management_system.print_user_data(users_list)
