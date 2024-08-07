@@ -1,5 +1,6 @@
 class ManagementSystem:
-    def print_user_data(self, users):
+
+    def print_user_data(self, users: list):
         print("User data")
         print("=========")
 
