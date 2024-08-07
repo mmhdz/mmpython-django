@@ -1,7 +1,7 @@
 import uuid
 from inheratence.model.enums.UserType import UserType
 
-class ExternalCustomer:
+class ExternalEmployee:
 
     def __init__(self, first_name: str, last_name: str):
         self.pk = uuid.uuid1()
