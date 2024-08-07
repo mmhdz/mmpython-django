@@ -83,7 +83,7 @@ class Developer(Employee):
     def __init__(self, first_name: str, last_name: str, client: Customer, salary: Salary):
         super().__init__(first_name, last_name, salary)
         self.client = client
-        self.occupancy = EmployeeOccupancy.Manager
+        self.occupancy = EmployeeOccupancy.Developer
 
     def get_salary(self):
         return super().get_salary()

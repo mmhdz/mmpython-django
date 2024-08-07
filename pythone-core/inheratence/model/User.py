@@ -87,7 +87,7 @@ class Developer(DeveloperSalary):
         overtime = GeneralUtil.calculate_overtime(working_hours)
         super().__init__(first_name, last_name, working_hours, 24.4, overtime)
         self.client = client
-        self.occupancy = EmployeeOccupancy.Manager
+        self.occupancy = EmployeeOccupancy.Developer
 
     def get_salary(self):
         return super().calculate_salary()
