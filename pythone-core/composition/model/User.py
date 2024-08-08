@@ -1,8 +1,8 @@
 import uuid
 
 from composition.model.Salary import Salary
+from composition.model.enums.CustomerType import CustomerType
 from inheratence.model.enums.UserType import UserType
-from inheratence.model.enums.CustomerType import CustomerType
 from inheratence.model.enums.EmployeeOccupancy import EmployeeOccupancy
 
 class User:

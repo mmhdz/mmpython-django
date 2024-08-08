@@ -1,7 +1,6 @@
 
 class GeneralUtil:
 
-
     @staticmethod
     def calculate_overtime(working_hrs: int):
         overtime = 0
