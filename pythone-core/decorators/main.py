@@ -25,6 +25,11 @@ def multiple_decorators():
     return non_reversed_names_list
 
 
+@get_element_by_index_with_func_parameters(cars, CarType.SPORT_CAR)
+def get_number_of_cars_by_type(cars_list: list, car_type: CarType):
+    print(f"Number of cars with type {car_type.name} in the list are {len([x for x in cars_list if x.type == car_type])}")
+
+
 @change_sport_car_price
 @filter_sport_cars
 def change_car_info_and_print_it(cars_list: list):
@@ -53,4 +58,4 @@ if __name__ == "__main__":
     function_with_no_args()
     function_with_args(sport_car.brand, 1402, cars)
     function_with_keywords(name=family_car.brand, number=101)
-
+    get_number_of_cars_by_type(cars, CarType.FAMILY_CAR)

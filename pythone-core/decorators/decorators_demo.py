@@ -45,6 +45,19 @@ def get_element_by_index(index: int):
     return decorator
 
 
+def get_element_by_index_with_func_parameters(cars, car_type):
+    def decorator(function):
+        @functools.wraps(function)
+        def wrapper(args1, args2):
+            print(
+                f"Number of cars with type {car_type.name} in the list are {len([x for x in cars if x.type == car_type])}")
+            return function(args1, args2)
+
+        return wrapper
+
+    return decorator
+
+
 def change_sport_car_price(function):
     @functools.wraps(function)
     def wrapper(args):
