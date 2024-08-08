@@ -71,3 +71,9 @@ def filter_sport_cars(function):
     return wrapper
 
 
+def general_purpose_decorator(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        function(*args, **kwargs)
+
+    return wrapper

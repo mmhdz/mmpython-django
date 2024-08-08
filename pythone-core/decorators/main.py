@@ -31,9 +31,26 @@ def change_car_info_and_print_it(cars_list: list):
     return cars_list
 
 
+@general_purpose_decorator
+def function_with_no_args():
+    print("No arguments")
+
+@general_purpose_decorator
+def function_with_args(name: str, number: int, cars_list: list):
+    print(f"Name is {name}, number is {number}, cars types are {[x.type.name for x in cars_list]}")
+
+
+@general_purpose_decorator
+def function_with_keywords(name: str, number: int):
+    print(f"Name is {name}, number is {number}")
+
+
 if __name__ == "__main__":
     filter_first_name_by_index(2)
     get_first_name_list_reversed()
     multiple_decorators()
     change_car_info_and_print_it(cars)
+    function_with_no_args()
+    function_with_args(sport_car.brand, 1402, cars)
+    function_with_keywords(name=family_car.brand, number=101)
 
