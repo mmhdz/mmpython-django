@@ -3,9 +3,7 @@ from inheratence.model.ManagementSystem import ManagementSystem
 from inheratence.model.User import *
 
 
-
 customer = Customer("IamCustomer", "LastName")
-
 
 manager = Manager("MangerFirstName", "LastName", customer, 40)
 developer = Developer("DeveloperFirstName", "LastName", customer, 48)

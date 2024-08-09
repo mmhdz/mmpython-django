@@ -58,7 +58,7 @@ def get_element_by_index_with_func_parameters(cars, car_type):
     return decorator
 
 
-def change_sport_car_price(function):
+def change_sport_cars_price(function):
     @functools.wraps(function)
     def wrapper(args):
         cars = function(args)
