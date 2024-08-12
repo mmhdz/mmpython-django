@@ -1,8 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
-class User(models.Model):
-    username = models.EmailField(max_length=200)
+class User(AbstractUser):
+    username = models.EmailField(max_length=200, unique=True)
     password = models.CharField(max_length=100)
     registration_date = models.DateTimeField("the date user is registered")
 
@@ -12,6 +13,7 @@ class User(models.Model):
 
 class BlogPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.TextField(max_length=240, default=None)
     text = models.TextField(max_length=1024)
     positive_rating = models.IntegerField(default=0)
     negative_rating = models.IntegerField(default=0)
