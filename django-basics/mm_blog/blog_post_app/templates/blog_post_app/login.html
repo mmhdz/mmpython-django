@@ -7,8 +7,12 @@
 
 </head>
 <body>
+<div class="container">
 <h1> Login into your account</h1>
-    <form action="{% url 'blog_post_app:login_page' %}" method="post">
+    {% if has_authenticated == False %}
+    <p class="text-danger">Login failed. Please try again</p>
+    {% endif %}
+    <form action="{% url 'blog_post_app:post-login' %}" method="post">
     {% csrf_token %}
 
       <div class="form-group">
@@ -20,7 +24,11 @@
         <label for="exampleInputPassword1"  >Password</label>
         <input type="password" name="login_user_dto.password" class="form-control" id="exampleInputPassword1" placeholder="Password">
       </div>
+        <div>
+            <p>Does not having an account? <a href="{% url 'blog_post_app:get-registration' %}"> Register from here</a></p>
+        </div>
       <button type="submit" class="btn btn-primary">Login</button>
     </form>
+</div>
 </body>
 </html>

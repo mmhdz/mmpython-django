@@ -1,44 +1,45 @@
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
+from .helper import Helper
 from .models import *
 from datetime import datetime
 
 
-def login_view(request):
+def get_login_view(request):
     context = {
         "login_user_dto": User()
     }
 
-    if request.POST:
-        username = request.POST.get('login_user_dto.username')
-        password = request.POST.get('login_user_dto.password')
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            login(request, user)
-
-            context = {
-                "comments": list(),
-                "blog_post": BlogPost()
-
-            }
-            return render(request, "blog_post_app/home.html", context)
-        else:
-            return render(request, "blog_post_app/login.html", context)
-    else:
-        return render(request, "blog_post_app/login.html", context)
+    return render(request, "blog_post_app/login.html", context)
 
 
-def register_get_page(request):
+def post_login_view(request):
+    username = request.POST.get('login_user_dto.username')
+    password = request.POST.get('login_user_dto.password')
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        return get_home_view(request)
+
+    context = {
+        "has_authenticated": False
+    }
+
+    return render(request, "blog_post_app/login.html", context)
+
+
+def get_registration_view(request):
     context = {
         "registration_user": User()
     }
     return render(request,  "blog_post_app/register.html", context)
 
 
-def register_post_request(request):
+def post_registration_view(request):
     username = request.POST.get('registration_user.username')
     password = request.POST.get('registration_user.password')
 
@@ -49,8 +50,60 @@ def register_post_request(request):
 
     User.objects.create_user(username=username, password=password, registration_date=datetime.now())
 
-    return HttpResponseRedirect(reverse("blog_post_app:login_page"))
+    return HttpResponseRedirect(reverse("blog_post_app:get-login"))
 
 
-def create_blog_post(request):
-    return HttpResponse(request.user.username + " response")
+def get_home_view(request):
+    blog_posts = BlogPost.objects.all()
+
+    context = {
+        "blog_post": BlogPost(),
+        "blog_posts": blog_posts,
+        "comment_text": str(),
+        "hashtag_string": str()
+    }
+
+    return render(request, "blog_post_app/home.html", context)
+
+
+def post_home_view(request):
+    title = request.POST.get('blog_post.title')
+    text = request.POST.get('blog_post.text')
+    hashtag_string = request.POST.get("hashtag_string")
+
+    hashtags = Helper.modify_hashtag_raw_string(hashtag_string)
+    print(hashtags)
+    blog_post = BlogPost.objects.create(title=title, text=text, user=request.user)
+
+    for hashtag in hashtags:
+        saved_hashtag = Hashtag.objects.create(value=hashtag)
+        blog_post.hashtag_set.add(saved_hashtag)
+
+    blog_post.save()
+
+    return HttpResponseRedirect(reverse("blog_post_app:get-home"))
+
+
+def post_comment_view(request, post_pk):
+    comment_text = request.POST.get('comment_text')
+    found_blog_post = get_object_or_404(BlogPost, pk=post_pk)
+    new_comment = Comment(text=comment_text, post=found_blog_post)
+    new_comment.save()
+
+    return HttpResponseRedirect(reverse("blog_post_app:get-home"))
+
+
+def add_positive_rating_view(request, post_pk):
+    post = BlogPost.objects.get(pk=post_pk)
+    post.positive_rating += 1
+    post.save()
+
+    return HttpResponseRedirect(reverse("blog_post_app:get-home"))
+
+
+def add_negative_rating_view(request, post_pk):
+    post = BlogPost.objects.get(pk=post_pk)
+    post.negative_rating += 1
+    post.save()
+
+    return HttpResponseRedirect(reverse("blog_post_app:get-home"))

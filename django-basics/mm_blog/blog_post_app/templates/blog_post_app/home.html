@@ -7,7 +7,7 @@
 <body>
     <div class="container">
         <h1>Create a New Blog Post</h1>
-        <form action="{% url 'blog_post_app:blog_home' %}" method="post">
+        <form action="{% url 'blog_post_app:post-home' %}" method="post">
         {% csrf_token %}
             <div class="form-group">
                 <label>Title</label>
@@ -17,35 +17,56 @@
                 <label>Content</label>
                 <textarea class="form-control" rows="6" id="content" name="blog_post.text"></textarea>
             </div>
+            <div class="form-group">
+                <label>Hashtags</label>
+                <input type="text" class="form-control" name="hashtag_string" id="hashtag">
+            </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         <hr>
         <div class="post-section">
+            <h2 style="text-align: center;">Available Posts</h2>
+            <hr>
+            {% for blog_post in blog_posts %}
             <div class="post">
                 <div class="actions">
-                    <h4>Post Title</h4>
+                    <h4>{{ blog_post.title }}</h4>
                 </div>
-                <p>Post content goes here...</p>
+                <hr>
+                <p>{{ blog_post.text|urlize }}</p>
+                <hr>
+                <p> Hashtags:
+                    {% for hashtag in blog_post.hashtag_set.all %}
+                    <a href="#">{% if hashtag.value|slice:":1" != "#" %} # {% endif %} {{ hashtag.value }}</a>
+                    {% endfor %}
+                </p>
                 <hr>
                 <div class="d-flex align-items-center">
-                    <p class="mr-3">10 Likes</p>
-                    <button type="button" class="btn btn-success mr-3">👍</button>
-                    <p class="ml-3">1 Dislike</p>
-                    <button type="button" class="btn btn-danger ml-3">👎</button>
+                    <p class="mr-3">{{ blog_post.positive_rating }} Likes</p>
+                    <a type="button" href="{% url 'blog_post_app:post-positive-rating' blog_post.pk %}" class="btn btn-success mr-3">👍</a>
+                    <p class="ml-3">{{ blog_post.negative_rating }} Dislike</p>
+                    <a type="button" href="{% url 'blog_post_app:post-negative-rating' blog_post.pk %}" class="btn btn-danger ml-3">👎</a>
                 </div>
                 <hr>
                 <div class="comments">
                     <h5>Comments:</h5>
                     <hr>
-                    <div class="">Author username</div>
-                    <div class="comment">Comment 1</div>
+                    {% for comment in blog_post.comment_set.all %}
+                    <div class="">{{ comment.post.user.username }}</div>
+                    <div class="comment">{{ comment.text }}</div>
                     <hr>
-                    <div class="">Author username</div>
-                    <div class="comment">Comment 1</div>
+                    {% endfor %}
+                    <form action="{% url 'blog_post_app:post-comment' blog_post.pk %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea class="form-control mt-3" name="comment_text" rows="3" placeholder="Add a comment"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </form>
                 </div>
             </div>
+            {% endfor %}
         </div>
-
     </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
