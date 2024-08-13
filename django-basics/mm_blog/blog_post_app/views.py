@@ -5,7 +5,6 @@ from django.urls import reverse
 
 from .helper import Helper
 from .models import *
-from datetime import datetime
 
 
 def get_login_view(request):
@@ -48,7 +47,7 @@ def post_registration_view(request):
         context = {"has_user_exists": True}
         return render(request,  "blog_post_app/register.html", context)
 
-    User.objects.create_user(username=username, password=password, registration_date=datetime.now())
+    User.objects.create_user(username=username, password=password)
 
     return HttpResponseRedirect(reverse("blog_post_app:get-login"))
 

@@ -5,7 +5,7 @@ app_name = "blog_post_app"
 
 urlpatterns = [
     path("", views.get_login_view, name="get-login"),
-    path("/add", views.post_login_view, name="post-login"),
+    path("add", views.post_login_view, name="post-login"),
     path("register/", views.get_registration_view, name="get-registration"),
     path("register/add", views.post_registration_view, name="post-registration"),
     path("home_page/", views.get_home_view, name="get-home"),
