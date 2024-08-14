@@ -11,3 +11,4 @@
     * add link address in the text area where the blog post content is
 5. Add a comment to the post and rate it positive and negative ratings
 6. Login with second user and comment on the existing post
+7. Run the tests
