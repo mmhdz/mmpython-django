@@ -1,3 +1,42 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+
+
+class CommentInline(admin.TabularInline):
+    model = Comment
+    extra = 3
+
+
+class UserInline(admin.StackedInline):
+    model = User
+    extra = 4
+
+
+class UserAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ("Main info", {"fields": ["username", "password"]}),
+        ("Registration date", {"fields": ["registration_date"]})
+    ]
+
+    inlines = [CommentInline]
+    list_filter = ["registration_date"]
+    search_fields = ["username"]
+
+
+admin.site.register(User, UserAdmin)
+admin.site.register(BlogPost)
+
+
+class CommentAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ("Text", {"fields": ["text"]}),
+        ("Post", {"fields": ["post"]}),
+        ("User", {"fields": ["user"]})
+    ]
+
+
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(Hashtag)
+
+
