@@ -1,7 +1,4 @@
-import re
-
-
-class Helper:
+class Utils:
 
     @staticmethod
     def modify_hashtag_raw_string(hashtags_string: str):

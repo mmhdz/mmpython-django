@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
-from .helper import Helper
+from .utils import Utils
 from .models import *
 
 
@@ -70,7 +70,7 @@ def post_home_view(request):
     text = request.POST.get('blog_post.text')
     hashtag_string = request.POST.get("hashtag_string")
 
-    hashtags = Helper.modify_hashtag_raw_string(hashtag_string)
+    hashtags = Utils.modify_hashtag_raw_string(hashtag_string)
     print(hashtags)
     blog_post = BlogPost.objects.create(title=title, text=text, user=request.user)
 
