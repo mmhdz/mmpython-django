@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -86,7 +86,7 @@ def post_home_view(request):
 def post_comment_view(request, post_pk):
     comment_text = request.POST.get('comment_text')
     found_blog_post = get_object_or_404(BlogPost, pk=post_pk)
-    new_comment = Comment(text=comment_text, post=found_blog_post)
+    new_comment = Comment(text=comment_text, post=found_blog_post, user=request.user)
     new_comment.save()
 
     return HttpResponseRedirect(reverse("blog_post_app:get-home"))

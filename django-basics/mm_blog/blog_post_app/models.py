@@ -26,6 +26,7 @@ class BlogPost(models.Model):
 class Comment(models.Model):
     text = models.TextField(max_length=1024)
     post = models.ForeignKey(BlogPost, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Hashtag(models.Model):

@@ -37,7 +37,7 @@
                 <hr>
                 <p> Hashtags:
                     {% for hashtag in blog_post.hashtag_set.all %}
-                    <a href="#">{% if hashtag.value|slice:":1" != "#" %} # {% endif %} {{ hashtag.value }}</a>
+                    <a href="#">{% if hashtag.value|slice:":1" != "#" %}#{% endif %}{{ hashtag.value }}</a>
                     {% endfor %}
                 </p>
                 <hr>
@@ -52,7 +52,7 @@
                     <h5>Comments:</h5>
                     <hr>
                     {% for comment in blog_post.comment_set.all %}
-                    <div class="">{{ comment.post.user.username }}</div>
+                    <div class="">{{ comment.user.username }}</div>
                     <div class="comment">{{ comment.text }}</div>
                     <hr>
                     {% endfor %}
