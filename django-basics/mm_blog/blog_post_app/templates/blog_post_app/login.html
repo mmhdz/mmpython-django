@@ -11,24 +11,9 @@
 <body>
 <div class="container">
 <h1> Login into your account</h1>
-    {% if has_authenticated == False %}
-    <p class="text-danger">Login failed. Please try again</p>
-    {% endif %}
-    <form action="{% url 'blog_post_app:post-login' %}" method="post">
-    {% csrf_token %}
-
-      <div class="form-group">
-        <label for="exampleInputUsername">Username</label>
-        <input type="text" class="form-control" id="exampleInputUsername" name="login_user_dto.username" aria-describedby="emailHelp" placeholder="Enter username">
-       <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-      </div>
-      <div class="form-group">
-        <label for="exampleInputPassword1"  >Password</label>
-        <input type="password" name="login_user_dto.password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-      </div>
-        <div>
-            <p>Does not having an account? <a href="{% url 'blog_post_app:get-registration' %}"> Register from here</a></p>
-        </div>
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
       <button type="submit" class="btn btn-primary">Login</button>
     </form>
 </div>

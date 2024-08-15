@@ -12,22 +12,10 @@
     {% if has_user_exists == True %}
     <p class="text-danger">User with that username already exits</p>
     {% endif %}
-    <form action="{% url 'blog_post_app:post-registration' %}" method="post">
-    {% csrf_token %}
-
-      <div class="form-group">
-        <label for="exampleInputUsername">Username</label>
-        <input type="text" class="form-control" id="exampleInputUsername" name="registration_user.username" aria-describedby="emailHelp" placeholder="Enter username">
-        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-      </div>
-      <div class="form-group">
-        <label for="exampleInputPassword1"  >Password</label>
-        <input type="password" name="registration_user.password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-      </div>
-        <div>
-            <p>You have an account? <a href="{% url 'blog_post_app:get-login' %}"> Login from here</a></p>
-        </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type='submit' value='Register'/>
     </form>
 </div>
 </body>

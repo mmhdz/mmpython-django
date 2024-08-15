@@ -36,3 +36,4 @@ class Hashtag(models.Model):
         return f"id: {self.pk}, value: {self.value}"
 
 
+

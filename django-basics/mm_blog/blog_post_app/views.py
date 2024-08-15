@@ -1,57 +1,42 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from .utils import Utils
 from .models import *
+from .forms import *
 
 
-def get_login_view(request):
-    context = {
-        "login_user_dto": User()
-    }
+def login_view(request):
 
-    return render(request, "blog_post_app/login.html", context)
+    if request.method == "POST":
+        form = UserLoginForm(request, data=request.POST)
+        if form.is_valid() and form.user_cache is not None:
+            user = form.user_cache
+            if user.is_active:
+                login(request, user)
 
-
-def post_login_view(request):
-    username = request.POST.get('login_user_dto.username')
-    password = request.POST.get('login_user_dto.password')
-    user = authenticate(username=username, password=password)
-
-    if user is not None:
-        login(request, user)
-        return get_home_view(request)
-
-    context = {
-        "has_authenticated": False
-    }
-
-    return render(request, "blog_post_app/login.html", context)
+                return HttpResponseRedirect(reverse("blog_post_app:get-home"))
+    else:
+        context = {'form': UserLoginForm(request, data=request.POST)}
+        return render(request, "blog_post_app/login.html", context)
 
 
 def get_registration_view(request):
-    context = {
-        "registration_user": User()
-    }
+
+    form = UserRegisterForm(request.POST)
+
+    if form.is_valid():
+        form.save()
+
+    context = {'form': form}
+
     return render(request,  "blog_post_app/register.html", context)
 
 
-def post_registration_view(request):
-    username = request.POST.get('registration_user.username')
-    password = request.POST.get('registration_user.password')
-
-    found_user = User.objects.filter(username=username)
-    if found_user.count() > 0:
-        context = {"has_user_exists": True}
-        return render(request,  "blog_post_app/register.html", context)
-
-    User.objects.create_user(username=username, password=password)
-
-    return HttpResponseRedirect(reverse("blog_post_app:get-login"))
-
-
+@login_required
 def get_home_view(request):
     blog_posts = BlogPost.objects.all()
 
