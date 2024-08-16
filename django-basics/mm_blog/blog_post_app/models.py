@@ -35,8 +35,10 @@ class Hashtag(models.Model):
         return f"id: {self.pk}, value: {self.value}"
 
 
-class BlogPostVoting(models.Model):
-    positive_rating = models.IntegerField(default=0)
-    negative_rating = models.IntegerField(default=0)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    blog_post = models.OneToOneField(BlogPost, on_delete=models.CASCADE, related_name='blog_post_voting')
+class BlogPostVote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_post_voting_user')
+    blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='blog_post_voting')
+    status = models.BooleanField()
+
+    def __str__(self):
+        return f"vote_status: {self.status},  user: {self.user}, blog post: {self.blog_post}"

@@ -35,12 +35,16 @@ def registration_view(request):
 @login_required
 def get_home_view(request):
     blog_posts = BlogPost.objects.all()
+    negative_count = BlogPost.objects.filter(blog_post_voting__status=False).count()
+    positive_count = BlogPost.objects.filter(blog_post_voting__status=True).count()
 
     context = {
         "blog_post": BlogPost(),
         "blog_posts": blog_posts,
         "comment_text": str(),
         "hashtag_string": str(),
+        "negative_count": negative_count,
+        "positive_count": positive_count
     }
 
     return render(request, "blog_post_app/home.html", context)
@@ -74,15 +78,16 @@ def post_comment_view(request, post_pk):
 
 
 def blog_post_voting_view(request, post_pk: int, is_positive: str):
-    blog_post = BlogPost.objects.get(pk=post_pk)
-    voting = BlogPostVoting.objects.get(blog_post=blog_post) if not None else BlogPostVoting(blog_post=blog_post, user=request.user)
+    votes = BlogPostVote.objects.filter(blog_post__pk=post_pk, user=request.user)
     is_positive = is_positive.lower() == 'true'
 
-    if is_positive:
-        voting.positive_rating += 1
+    if not votes.exists():
+        BlogPostVote.objects.create(user=request.user, blog_post_id=post_pk, status=is_positive)
     else:
-        voting.negative_rating += 1
-    voting.save()
+        vote = votes.first()
+        if vote.status != is_positive:
+            vote.delete()
+            BlogPostVote.objects.create(user=request.user, blog_post_id=post_pk, status=is_positive)
 
     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
 
