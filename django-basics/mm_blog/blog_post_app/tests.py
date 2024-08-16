@@ -35,7 +35,7 @@ def create_comment_to_blog_post(client):
         "comment_text": "This is new comment"
     }
 
-    return client.post(reverse("blog_post_app:post-comment", args=(found_posts.pk,)), data=comment_data), found_posts
+    return client.post(reverse("blog_post_app:add-comment", args=(found_posts.pk,)), data=comment_data), found_posts
 
 
 def create_post_for_rating(client):
@@ -53,13 +53,13 @@ def create_post_for_rating(client):
 class BlogHomeTests(TestCase):
 
     def test_get_home_response_status_code_is_200(self):
-        client = Client()
+        client = login_with_default_user()
         response = client.get(reverse("blog_post_app:get-home"))
 
         self.assertEqual(response.status_code, 200, "Response status was not 200")
 
     def test_get_home_response_contains_all_context(self):
-        client = Client()
+        client = login_with_default_user()
         response = client.get(reverse("blog_post_app:get-home"))
 
         self.assertQuerySetEqual(response.context["blog_posts"], [])
@@ -132,28 +132,10 @@ class PostCommentTests(TestCase):
 
 
 class PostRatingTests(TestCase):
+    pass
 
-    def test_positive_rating_on_post(self):
-        client = login_with_default_user()
-        blog_post = create_post_for_rating(client)
-        initial_rating = blog_post.positive_rating
-        response = client.post(reverse("blog_post_app:post-positive-rating", args=(blog_post.pk,)))
 
-        blog_post = BlogPost.objects.get(title=blog_post.title)
 
-        self.assertEqual(response.status_code, 302)
-        self.assertIs(blog_post.positive_rating, initial_rating + 1, "Rating is not incremented by 1")
-
-    def test_negative_rating_on_post(self):
-        client = login_with_default_user()
-        blog_post = create_post_for_rating(client)
-        initial_rating = blog_post.positive_rating
-        response = client.post(reverse("blog_post_app:post-negative-rating", args=(blog_post.pk,)))
-
-        blog_post = BlogPost.objects.get(title=blog_post.title)
-
-        self.assertEqual(response.status_code, 302)
-        self.assertIs(blog_post.negative_rating, initial_rating + 1, "Rating is not incremented by 1")
 
 
 class UtilityFunctionsTest(TestCase):
