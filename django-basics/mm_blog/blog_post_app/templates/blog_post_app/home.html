@@ -43,10 +43,10 @@
                 </p>
                 <hr>
                 <div class="d-flex align-items-center">
-                    <p class="mr-3">{{ blog_post.positive_rating }} Likes</p>
-                    <a type="button" href="{% url 'blog_post_app:post-positive-rating' blog_post.pk %}" class="btn btn-success mr-3">👍</a>
-                    <p class="ml-3">{{ blog_post.negative_rating }} Dislike</p>
-                    <a type="button" href="{% url 'blog_post_app:post-negative-rating' blog_post.pk %}" class="btn btn-danger ml-3">👎</a>
+                    <p class="mr-3">{{ blog_post.blog_post_voting.positive_rating }} Likes</p>
+                    <a type="button" href="{% url 'blog_post_app:add-rating' blog_post.pk True %}" class="btn btn-success mr-3" >👍</a>
+                    <p class="ml-3">{{ blog_post.blog_post_voting.negative_rating }} Dislike</p>
+                    <a type="button" href="{% url 'blog_post_app:add-rating' blog_post.pk False %}" class="btn btn-danger ml-3" >👎</a>
                 </div>
                 <hr>
                 <div class="comments">
@@ -57,7 +57,7 @@
                     <div class="comment">{{ comment.text }}</div>
                     <hr>
                     {% endfor %}
-                    <form action="{% url 'blog_post_app:post-comment' blog_post.pk %}" method="post">
+                    <form action="{% url 'blog_post_app:add-comment' blog_post.pk %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <textarea class="form-control mt-3" name="comment_text" rows="3" placeholder="Add a comment"></textarea>

@@ -10,24 +10,20 @@ from .forms import *
 
 
 def login_view(request):
+    form = UserLoginForm(request, data=request.POST)
+    if form.is_valid() and form.user_cache is not None:
+        user = form.user_cache
+        if user.is_active:
+            login(request, user)
 
-    if request.method == "POST":
-        form = UserLoginForm(request, data=request.POST)
-        if form.is_valid() and form.user_cache is not None:
-            user = form.user_cache
-            if user.is_active:
-                login(request, user)
-
-                return HttpResponseRedirect(reverse("blog_post_app:get-home"))
+            return HttpResponseRedirect(reverse("blog_post_app:get-home"))
     else:
-        context = {'form': UserLoginForm(request, data=request.POST)}
+        context = {'form': form }
         return render(request, "blog_post_app/login.html", context)
 
 
-def get_registration_view(request):
-
+def registration_view(request):
     form = UserRegisterForm(request.POST)
-
     if form.is_valid():
         form.save()
 
@@ -44,7 +40,7 @@ def get_home_view(request):
         "blog_post": BlogPost(),
         "blog_posts": blog_posts,
         "comment_text": str(),
-        "hashtag_string": str()
+        "hashtag_string": str(),
     }
 
     return render(request, "blog_post_app/home.html", context)
@@ -77,17 +73,16 @@ def post_comment_view(request, post_pk):
     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
 
 
-def add_positive_rating_view(request, post_pk):
-    post = BlogPost.objects.get(pk=post_pk)
-    post.positive_rating += 1
-    post.save()
+def blog_post_voting_view(request, post_pk: int, is_positive: str):
+    blog_post = BlogPost.objects.get(pk=post_pk)
+    voting = BlogPostVoting.objects.get(blog_post=blog_post) if not None else BlogPostVoting(blog_post=blog_post, user=request.user)
+    is_positive = is_positive.lower() == 'true'
+
+    if is_positive:
+        voting.positive_rating += 1
+    else:
+        voting.negative_rating += 1
+    voting.save()
 
     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
 
-
-def add_negative_rating_view(request, post_pk):
-    post = BlogPost.objects.get(pk=post_pk)
-    post.negative_rating += 1
-    post.save()
-
-    return HttpResponseRedirect(reverse("blog_post_app:get-home"))
