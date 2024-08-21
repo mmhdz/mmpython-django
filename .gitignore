@@ -3,4 +3,5 @@
 .venv
 __pycache__
 .idea
-
+*.sqlite3
+old_migrations
