@@ -1,108 +1,83 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
-from django.shortcuts import render
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, GenericAPIView
-from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404, get_list_or_404
+from rest_framework.generics import DestroyAPIView, GenericAPIView
+from rest_framework.pagination import PageNumberPagination
+
 from .serializers import *
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from http import HTTPMethod
 
 from .models import *
+from .permissions import IsOwner, IsAdminOwnerOrReadOnly
 from .serializers import *
 
-
-class CreatePostView(CreateAPIView):
+class PostView(ModelViewSet):
     serializer_class = PostSerilizerClass
-    permission_classes = [IsAuthenticated]
-    
+    queryset = BlogPost.objects.all().order_by("-created_at")
+    permission_classes = [IsAdminOwnerOrReadOnly]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'user': request.user})
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+class DeleteHashtagsView(DestroyAPIView):
+    serializer_class = HashtagSerializerClass
+    queryset = Hashtag.objects.all()
+    permission_classes = [IsAdminUser]
+
+
+class CommentView(ModelViewSet):
+    serializer_class = CommentSerializerClass
+    permission_classes = [IsOwner]
+    queryset = Comment.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            blog_post = BlogPost.objects.get(pk=kwargs['pk'])
+            serializer.save(user=request.user, post=blog_post)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, *args, **kwargs):
+        comment = self.get_object()
+        comment.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 
-
-
-
-# def login_view(generics):
-#     lookuo_field = "id"
-#     queryset = User.objects.all()
+class VoteOnPost(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    allowed_methods = [HTTPMethod.GET, HTTPMethod.POST]
+    serializer_class = VotesSerializerClass
     
     
-#     return render(request, "blog_post_app/login.html", context)
+    def get(self, request, **kwargs):
+        votes = get_list_or_404(Vote, blog_post__pk=kwargs['pk'])
+        serializer = self.get_serializer(votes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
+    def post(self, request, **kwargs):
+        is_positive = kwargs['is_positive'].lower() == 'true'
+        post = get_object_or_404(BlogPost, pk=kwargs['pk'])
+        
+        votes = Vote.objects.filter(blog_post=post, user=request.user)
 
+        if not votes.exists():
+            Vote.objects.create(user=request.user, blog_post=post, status=is_positive)
+        else:
+            vote = votes.first()
+            if vote.status != is_positive:
+                vote.delete()
+                Vote.objects.create(user=request.user, blog_post=post, status=is_positive)
 
-#
-#
-# @login_required
-# def get_home_view(request):
-#     blog_posts = BlogPost.objects.all()
-#     negative_count = BlogPost.objects.filter(blog_post_voting__status=False).count()
-#     positive_count = BlogPost.objects.filter(blog_post_voting__status=True).count()
-#
-#     context = {
-#         "blog_post": BlogPost(),
-#         "blog_posts": blog_posts,
-#         "comment_text": str(),
-#         "hashtag_string": str(),
-#         "negative_count": negative_count,
-#         "positive_count": positive_count
-#     }
-#
-#     return render(request, "blog_post_app/home.html", context)
-#
-#
-# def post_home_view(request):
-#     title = request.POST.get('blog_post.title')
-#     text = request.POST.get('blog_post.text')
-#     hashtag_string = request.POST.get("hashtag_string")
-#
-#     hashtags = Utils.modify_hashtag_raw_string(hashtag_string)
-#     print(hashtags)
-#     blog_post = BlogPost.objects.create(title=title, text=text, user=request.user)
-#
-#     for hashtag in hashtags:
-#         saved_hashtag = Hashtag.objects.create(value=hashtag)
-#         blog_post.hashtag_set.add(saved_hashtag)
-#
-#     blog_post.save()
-#
-#     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
-#
-#
-# def post_comment_view(request, post_pk):
-#     comment_text = request.POST.get('comment_text')
-#     found_blog_post = get_object_or_404(BlogPost, pk=post_pk)
-#     new_comment = Comment(text=comment_text, post=found_blog_post, user=request.user)
-#     new_comment.save()
-#
-#     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
-#
-#
-# def blog_post_voting_view(request, post_pk: int, is_positive: str):
-#     votes = BlogPostVote.objects.filter(blog_post__pk=post_pk, user=request.user)
-#     is_positive = is_positive.lower() == 'true'
-#
-#     if not votes.exists():
-#         BlogPostVote.objects.create(user=request.user, blog_post_id=post_pk, status=is_positive)
-#     else:
-#         vote = votes.first()
-#         if vote.status != is_positive:
-#             vote.delete()
-#             BlogPostVote.objects.create(user=request.user, blog_post_id=post_pk, status=is_positive)
-#
-#     return HttpResponseRedirect(reverse("blog_post_app:get-home"))
-
+        return Response(status=status.HTTP_201_CREATED)

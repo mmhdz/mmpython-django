@@ -16,11 +16,11 @@ class UserInline(admin.StackedInline):
 class UserAdmin(admin.ModelAdmin):
     fieldsets = [
         ("Main info", {"fields": ["username", "password"]}),
-        ("Registration date", {"fields": ["registration_date"]})
+        ("Registration date", {"fields": ["created_at"]})
     ]
 
     inlines = [CommentInline]
-    list_filter = ["registration_date"]
+    list_filter = ["created_at"]
     search_fields = ["username"]
 
 

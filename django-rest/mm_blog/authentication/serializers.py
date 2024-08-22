@@ -4,15 +4,14 @@ from rest_framework import serializers
 
 class SingUpSerilizer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    is_admin = serializers.BooleanField(write_only=True, default=False)
+    is_staff = serializers.BooleanField(write_only=True, default=False)
     class Meta:
         model = User
         fields = (
             "username",
             "email",
             "password",
-            "is_admin",
-            "role"
+            "is_staff",
         )
 
 

@@ -5,8 +5,8 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/auth", include("authentication.urls")),
-    path("api/blog", include("blog.urls")),
+    path("api/auth/", include("authentication.urls")),
+    path("api/blog/", include("blog.urls")),
 
 
 ] + debug_toolbar_urls()

@@ -6,8 +6,7 @@ app_name = "authentication"
 
 
 urlpatterns = [
-    path("/signup", SingUpView.as_view()),
-    path("/singin", SingInView.as_view()),
-
+    path("signup", SingUpView.as_view()),
+    path("singin", SingInView.as_view()),
 
 ]
