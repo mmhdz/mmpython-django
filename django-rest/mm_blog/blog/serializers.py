@@ -56,10 +56,12 @@ class PostSerilizerClass(serializers.ModelSerializer):
         return instance
     
     def update(self, instance, validated_data):
-        hashtags_from_request = validated_data.pop('hashtags', [])
-        hashtags = filter_first_10_hashtags(hashtags_from_request)
-        filterd_hashtags = self._get_or_create_hashtags(hashtags)
-        instance.hashtags.set(filterd_hashtags)
+        hashtags = validated_data.pop('hashtags', [])
+        instance.title = validated_data['title']
+        instance.text = validated_data['text']
+        instance.save()
+        hashtags_objects = self._get_or_create_hashtags(hashtags)
+        instance.hashtags.set(hashtags_objects)
         return instance
 
 
