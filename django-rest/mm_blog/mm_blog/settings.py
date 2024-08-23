@@ -89,10 +89,6 @@ DATABASES = {
             'PASSWORD': os.getenv('MYSQL_PASSWORD'),
             'HOST': os.getenv('MYSQL_HOST'),
             'PORT': os.getenv('MYSQL_PORT'),
-            'TEST': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': f'{BASE_DIR} / db.sqlite3',
-            },
         }  
 }
 

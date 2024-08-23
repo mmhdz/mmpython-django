@@ -34,7 +34,5 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 volumes:
   data: 
