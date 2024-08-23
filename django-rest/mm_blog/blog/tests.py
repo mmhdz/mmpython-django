@@ -1,142 +1,274 @@
-# from django.test import TestCase, Client
-# from django.urls import reverse
+from rest_framework.test import APIClient
+from rest_framework.test import APITestCase
+from .models import *
 
-# from .utils import Utils
-# from .models import *
-# import random
+def login_with_default_user():
+    client = APIClient()
 
+    default_user = {
+        "username": "admin",
+        "email": "admin@email.com",
+        "password": "test123",
+        "is_staff": True    
+    }
 
-# def login_with_default_user():
-#     client = Client()
-#     user = User.objects.create_user(username="test@test.com", password="test123")
-#     client.force_login(user)
+    response = client.post('/api/auth/signup', default_user, format="json")
+    assert response.status_code, 201
+    user = User.objects.get(email="admin@email.com")
+    client.force_authenticate(user)
 
-#     return client
-
-
-# def create_post(client, post_data: dict):
-#     return client.post(reverse("blog_post_app:post-home"), data=post_data)
-
-
-# def create_comment_to_blog_post(client):
-#     post_data = {
-#         "blog_post.title": "New Blog Post With Comment",
-#         "blog_post.text": "This is the content of the new blog post.",
-#         "hashtag_string": "#hashtag"
-#     }
-
-#     create_post(client, post_data)
-
-#     found_posts = BlogPost.objects.get(title="New Blog Post With Comment")
-#     comment_data = {
-#         "comment_text": "This is new comment"
-#     }
-
-#     return client.post(reverse("blog_post_app:add-comment", args=(found_posts.pk,)), data=comment_data), found_posts
+    return client
 
 
-# def create_post_for_rating(client):
-#     post_data = {
-#         "blog_post.title": f"New Blog Post for rating Comment {random.randint(10000, 1000000)}",
-#         "blog_post.text": "This is the content of the new blog post.",
-#         "hashtag_string": "#hashtag"
-#     }
+def create_post(client, data: dict):
+    response = client.post("/api/blog/post/", data, format="json")
+    assert response.status_code == 201
 
-#     create_post(client, post_data)
+    response_data = response.json()
 
-#     return BlogPost.objects.get(title=post_data['blog_post.title'])
+    return response_data
 
+class PostViewTests(APITestCase):
 
-# class BlogHomeTests(TestCase):
+    def test_post_view_return_status_200_for_authenticated_user(self):
+        client = login_with_default_user()
+        response = client.get("/api/blog/post/")
 
-#     def test_get_home_response_status_code_is_200(self):
-#         client = login_with_default_user()
-#         response = client.get(reverse("blog_post_app:get-home"))
+        self.assertEqual(response.status_code, 200, "Response status was not 200")
 
-#         self.assertEqual(response.status_code, 200, "Response status was not 200")
+    def test_post_view_create_post(self):
+        client = login_with_default_user()
 
-#     def test_get_home_response_contains_all_context(self):
-#         client = login_with_default_user()
-#         response = client.get(reverse("blog_post_app:get-home"))
+        data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["test_hashtag1", "test_hashtag2"]
+        }
 
-#         self.assertQuerySetEqual(response.context["blog_posts"], [])
-#         self.assertIsNotNone(response.context['blog_post'])
-#         self.assertIs(response.context['comment_text'].__class__, type(str()))
-#         self.assertIs(response.context['hashtag_string'].__class__, type(str()))
+        response_data = create_post(client, data)
 
-#     def test_create_new_post(self):
-#         post_data = {
-#             "blog_post.title": "New Blog Post",
-#             "blog_post.text": "This is the content of the new blog post.",
-#             "hashtag_string": "#hashtag, #test"
-#         }
+        self.assertIsNotNone(response_data['pk'], "Primary key from the response was None")
+        self.assertIsNotNone(response_data['created_at'], "created_at from the response was None")
+        self.assertEqual(response_data['title'], data['title'], "Title was not matching")
+        self.assertEqual([x['value'] for x in response_data['hashtags']], data['hashtags'], "Hashtags list was not equal")
+        self.assertTrue(len(response_data['comment_set']) == 0, "Comments set was not empty")
 
-#         client = login_with_default_user()
-#         response = create_post(client, post_data)
+    def test_update_existing_post(self):
+        client = login_with_default_user()
+        data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["test_hashtag1", "test_hashtag2"]
+        }
 
-#         self.assertEqual(response.status_code, 302)
+        response_data = create_post(client, data)
 
-#         found_posts = BlogPost.objects.get(title="New Blog Post")
-#         hashtags = found_posts.hashtag_set.all()
-#         hashtag_values = [x.value for x in hashtags]
+        post_id = response_data['pk']
 
-#         self.assertIsNotNone(found_posts, "Found posts is None")
-#         self.assertEqual(found_posts.text, "This is the content of the new blog post.", "Text is not matching")
-#         self.assertTrue("#hashtag" in hashtag_values, "Hashtag is not in the query set")
-#         self.assertTrue("#test" in hashtag_values, "Hashtag is not in the query set")
+        data = {
+            "title": "This is updated title1",
+            "text": "Description update",
+            "hashtags": ["test_hashtag1_update", "test_hashtag2_update"]
+        }
 
-#     def test_newly_created_post_is_in_the_html_content(self):
-#         post_data = {
-#             "blog_post.title": "New Blog Post Html content",
-#             "blog_post.text": "This is the content of the new blog post.",
-#             "hashtag_string": "#hashtag, #test"
-#         }
+        response = client.put(f"/api/blog/post/{post_id}/", data, format="json")
+        self.assertEqual(response.status_code, 200)
 
-#         client = login_with_default_user()
-#         create_post(client, post_data)
+        response = client.get(f"/api/blog/post/{post_id}/", format="json")
+        self.assertEqual(response.status_code, 200)
 
-#         response = client.get(reverse("blog_post_app:get-home"))
-#         html_content_decoded = response.content.decode("utf-8")
+        response_data = response.json()
 
-#         self.assertTrue(post_data['blog_post.title'] in html_content_decoded)
-#         self.assertTrue(post_data['blog_post.text'] in html_content_decoded)
+        self.assertEqual(response_data['pk'], post_id, "Returned post pk mismatch")
+        self.assertEqual(response_data['title'], data['title'], "Updated title text mismatch")
+        self.assertEqual(response_data['text'], data['text'], "Updated text mismatch")
+        self.assertEqual([x['value'] for x in response_data['hashtags']], data['hashtags'], "Hashtags values does not match")
 
+    
+    def test_delete_post(self):
+        client = login_with_default_user()
+        data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["test_hashtag1", "test_hashtag2"]
+        }
 
-# class PostCommentTests(TestCase):
+        response_data = create_post(client, data)
+        post_id = response_data['pk']
 
-#     def test_add_comment_to_a_post(self):
-#         client = login_with_default_user()
-#         response, blog_post = create_comment_to_blog_post(client)
+        response = client.delete(f"/api/blog/post/{post_id}/")
+        self.assertEqual(response.status_code, 204)
 
-#         self.assertEqual(response.status_code, 302)
-
-#         comments = blog_post.comment_set.all()
-#         comments_text = [x.text for x in comments]
-
-#         self.assertTrue("This is new comment" in comments_text, "Comment text is not present in the post comments")
-
-#     def test_comment_owner_is_the_logged_user(self):
-#         client = login_with_default_user()
-#         response, blog_post = create_comment_to_blog_post(client)
-
-#         self.assertEqual(response.status_code, 302)
-
-#         comments = blog_post.comment_set.all()
-#         comments_usernames = [x.user.username for x in comments]
-
-#         self.assertTrue(response.wsgi_request.user.username in comments_usernames,
-#                         "Logged user username is not in the blog post comments response")
+        response = client.get(f"/api/blog/post/{post_id}/", format="json")
+        self.assertEqual(response.status_code, 404)
 
 
-# class PostRatingTests(TestCase):
-#     pass
+
+    def test_retriave_post_by_id_retruns_the_correct_post(self):
+        client = login_with_default_user()
+        data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["test_hashtag1", "test_hashtag2"]
+        }
+
+        response_data = create_post(client, data)
+        post_id = response_data['pk']
+
+        response = client.get(f"/api/blog/post/{post_id}/", format="json")
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+
+        self.assertEqual(data['pk'], post_id, "The post id does not match")
 
 
-# class UtilityFunctionsTest(TestCase):
+    def test_filter_posts_by_hashtags(self):
+        client = login_with_default_user()
+        first_post_data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["first_hashtag", "test_hashtag2"]
+        }
 
-#     def test_modify_hashtag_string(self):
-#         hashtag_string_unformatted = "#hashtag, #second_hashtag #third \
-#          #anotherone    last_one"
+        create_post(client, first_post_data)
+        
+        second_post_data = {
+            "title": "This is title1",
+            "text": "Description",
+            "hashtags": ["second_hashtag", "test_hashtag2"]
+        }
 
-#         hashtags = Utils.modify_hashtag_raw_string(hashtag_string_unformatted)
-#         self.assertIs(len(hashtags), 5)
+        create_post(client, second_post_data)
+
+        response = client.get(f"/api/blog/post?hashtag={first_post_data['hashtags'][0]}", format="json", follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.json()
+
+        self.assertTrue(first_post_data['hashtags'][0] in [x['value'] for x in response_data['results'][0]['hashtags']])
+        self.assertTrue(len(response_data['results']) == 1)
+
+
+        response = client.get(f"/api/blog/post?hashtag={second_post_data['hashtags'][0]}", format="json", follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.json()
+ 
+        self.assertTrue(second_post_data['hashtags'][0] in [x['value'] for x in response_data['results'][0]['hashtags']])
+        self.assertTrue(len(response_data['results']) == 1)
+
+
+        response = client.get(f"/api/blog/post?hashtag={first_post_data['hashtags'][1]}", format="json", follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.json()
+
+        self.assertTrue(first_post_data['hashtags'][1] and second_post_data['hashtags'][1] in [x['value'] for x in response_data['results'][0]['hashtags']])
+        self.assertTrue(len(response_data['results']) == 2)
+
+class CommentsTest(APITestCase):
+
+    def test_create_comment(self):
+        client = login_with_default_user()
+        data = {
+                "title": "This is title1",
+                "text": "Description",
+                "hashtags": ["second_hashtag", "test_hashtag2"]
+            }
+
+        post_data = create_post(client, data)
+
+        comment_data = {
+            "text": "Create new comment"
+        }
+
+        response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data)
+
+        self.assertEqual(response.status_code, 201)
+        response_data = response.json()
+
+        self.assertIsNotNone(response_data['pk'])
+        self.assertEqual(response_data['text'], comment_data['text'])
+
+    
+    def test_delete_comment_by_id(self):
+        client = login_with_default_user()
+        data = {
+                "title": "This is title1",
+                "text": "Description",
+                "hashtags": ["second_hashtag", "test_hashtag2"]
+            }
+
+        post_data = create_post(client, data)
+
+        comment_data = {
+            "text": "Create new comment"
+        }
+
+        response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        response_data = response.json()
+
+        response = client.delete(f"/api/blog/comment/{response_data['pk']}")
+        self.assertEqual(response.status_code, 204)
+
+        response = client.get(f"/api/blog/post/{post_data['pk']}/comments/", format="json")
+        self.assertEqual(response.status_code, 200)
+
+        respose_data = response.json()
+
+        self.assertTrue(len(respose_data['results']) == 0)
+
+    def test_update_comment(self):
+        client = login_with_default_user()
+        data = {
+                "title": "This is title1",
+                "text": "Description",
+                "hashtags": ["second_hashtag", "test_hashtag2"]
+            }
+
+        post_data = create_post(client, data)
+
+        comment_data = {
+            "text": "Create new comment"
+        }
+
+        response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data, format="json")
+        comment_id = response.json()['pk']
+        comment_data = {
+            "text": "Update comment text"
+        }
+
+        response =  client.put(f"/api/blog/comment/{comment_id}", comment_data, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.json()
+
+        self.assertEqual(response_data['pk'], comment_id)
+        self.assertEqual(response_data['text'], comment_data['text'])
+
+
+class HashtagTest(APITestCase):
+
+
+    def test_delete_hashtag(self):
+        
+        client = login_with_default_user()
+        data = {
+                "title": "This is title1",
+                "text": "Description",
+                "hashtags": ["second_hashtag", "test_hashtag2"]
+            }
+
+        post_data = create_post(client, data)
+        hashtag_id = post_data['hashtags'][0]['pk']
+        response = client.delete(f"/api/blog/hashtag/{hashtag_id}")
+
+        self.assertEqual(response.status_code, 204)
+
+        response = client.get(f"/api/blog/post/{post_data['pk']}/", format="json")
+        response_data = response.json()
+        self.assertTrue(hashtag_id not in [x['value'] for x in response_data['hashtags']])

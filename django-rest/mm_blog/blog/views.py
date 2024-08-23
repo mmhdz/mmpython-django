@@ -27,7 +27,7 @@ class PostView(ModelViewSet):
     search_fields = ['=title']
     ordering_fields = ['created_at']
 
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
