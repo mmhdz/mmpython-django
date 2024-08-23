@@ -44,6 +44,21 @@ class BlogPost(models.Model):
     created_at = models.DateTimeField(default=django.utils.timezone.now)
     
 
+    @property
+    def thumbs_up(self):
+        return self.blog_post_voting.filter(status=True).count()
+
+    @property
+    def thumbs_down(self):
+        return self.blog_post_voting.filter(status=False).count()
+    
+    @property
+    def is_hot(self):
+        if self.thumbs_up >= 5 and self.comment_set.all().count() >= 2:
+            return True
+        else:
+            return False
+
     def __str__(self):
         return f"id: {self.pk}, title: {self.title}, text: {self.text}, user_id: {self.user.pk}, hashtags: {self.hashtags.get_queryset()}"
 

@@ -1,24 +1,33 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
+from http import HTTPMethod
+
 from rest_framework.generics import DestroyAPIView, GenericAPIView
 from rest_framework.pagination import PageNumberPagination
 
-from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from http import HTTPMethod
+from rest_framework.filters import OrderingFilter
 
 from .models import *
 from .permissions import IsOwner, IsAdminOwnerOrReadOnly
 from .serializers import *
+from .search import SearchFiltterMutipleValues
+from .filters import FiterPostByHashtagOrHot
+
+
 
 class PostView(ModelViewSet):
     serializer_class = PostSerilizerClass
     queryset = BlogPost.objects.all().order_by("-created_at")
     permission_classes = [IsAdminOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFiltterMutipleValues, OrderingFilter, FiterPostByHashtagOrHot]
+    search_fields = ['=title']
+    ordering_fields = ['created_at']
 
+    
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
