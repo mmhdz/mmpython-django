@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = str(Path(__file__).resolve().parent.parent)
 
 
 # Quick-start development settings - unsuitable for production
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'mm_blog.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-
+   
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': os.getenv('MYSQL_DATABASE'),
@@ -89,7 +89,11 @@ DATABASES = {
             'PASSWORD': os.getenv('MYSQL_PASSWORD'),
             'HOST': os.getenv('MYSQL_HOST'),
             'PORT': os.getenv('MYSQL_PORT'),
-        }
+            'TEST': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': f'{BASE_DIR} / db.sqlite3',
+            },
+        }  
 }
 
 
@@ -148,5 +152,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+
 }
