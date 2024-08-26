@@ -191,7 +191,7 @@ def test_create_comment():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data)
+    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data)
 
     assert response.status_code == 201
     response_data = response.json()
@@ -214,7 +214,7 @@ def test_delete_comment_by_id():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data, format="json")
+    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
 
     assert response.status_code == 201
     response_data = response.json()
@@ -245,7 +245,7 @@ def test_update_comment():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/comments/", comment_data, format="json")
+    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
     comment_id = response.json()['pk']
     comment_data = {
         "text": "Update comment text"
