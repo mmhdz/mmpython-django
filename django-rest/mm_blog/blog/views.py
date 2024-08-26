@@ -74,8 +74,3 @@ class CommentView(ModelViewSet):
     permission_classes = [IsOwner]
     queryset = Comment.objects.all()
 
-    def delete(self, request, *args, **kwargs):
-        comment = self.get_object()
-        comment.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
