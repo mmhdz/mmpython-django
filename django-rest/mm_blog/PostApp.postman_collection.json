@@ -404,7 +404,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/blog/post/3/comments/",
+							"raw": "http://127.0.0.1:8000/api/blog/post/1/add_comment/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -417,8 +417,8 @@
 								"api",
 								"blog",
 								"post",
-								"3",
-								"comments",
+								"1",
+								"add_comment",
 								""
 							]
 						}
@@ -522,7 +522,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/blog/post/2/votes/True",
+							"raw": "http://127.0.0.1:8000/api/blog/post/1/add_vote/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -535,9 +535,9 @@
 								"api",
 								"blog",
 								"post",
-								"2",
-								"votes",
-								"True"
+								"1",
+								"add_vote",
+								""
 							]
 						}
 					},
