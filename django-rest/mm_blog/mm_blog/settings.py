@@ -16,13 +16,13 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+IS_DOCKER = os.getenv('IS_DOCKER') == "true"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -80,18 +80,27 @@ WSGI_APPLICATION = 'mm_blog.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-   
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('MYSQL_DATABASE'),
-            'USER': os.getenv('MYSQL_USER'),
-            'PASSWORD': os.getenv('MYSQL_PASSWORD'),
-            'HOST': os.getenv('MYSQL_HOST'),
-            'PORT': os.getenv('MYSQL_PORT'),
-        }  
-}
+if IS_DOCKER:
 
+    DATABASES = {
+    
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('POSTGRES_DATABASE'),
+                'USER': os.getenv('POSTGRES_USER'),
+                'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+                'HOST': os.getenv('POSTGRES_HOST'),
+                'PORT': os.getenv('POSTGRES_PORT'),
+            }  
+    }
+else:
+     DATABASES = {
+    
+            'default': {
+                 'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': BASE_DIR / 'db.sqlite3',
+            }
+     }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
