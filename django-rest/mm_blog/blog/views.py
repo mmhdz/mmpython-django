@@ -18,6 +18,8 @@ from .search import SearchFiltterMutipleValues
 from .filters import FiterPostByHashtagOrHot
 import json
 
+from .tasks import delete_one_year_old_posts_without_comments
+
 
 class PostView(ModelViewSet):
     serializer_class = PostSerilizerClass
@@ -43,6 +45,7 @@ class PostView(ModelViewSet):
         if serializer.is_valid():
             blog_post = BlogPost.objects.get(pk=kwargs['pk'])
             serializer.save(user=request.user, post=blog_post)
+            delete_one_year_old_posts_without_comments()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
