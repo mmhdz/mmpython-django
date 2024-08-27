@@ -11,5 +11,4 @@ config
 .pytest_cache
 config/*
 data
-*/migration*
-mm_blog/blog/migrations
+*migrations*
