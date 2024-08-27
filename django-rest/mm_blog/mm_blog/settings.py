@@ -170,13 +170,3 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
-
-CELERY_BEAT_SCHEDULE = {
-    'daily-task-at-midnight': {
-        'task': 'post.tasks.delete_one_year_old_posts_without_comments',
-        'schedule': crontab("0", "0"),
-        'options': {
-            'expires': 60 * 60,
-        },
-    },
-}

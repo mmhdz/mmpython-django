@@ -12,3 +12,4 @@ config
 config/*
 data
 *migrations*
+*celerybeat*
