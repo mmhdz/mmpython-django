@@ -3,11 +3,11 @@ from .models import *
 from .utils import *
 
 
-
 class HashtagSerializerClass(serializers.ModelSerializer):
     class Meta:
         model = Hashtag
         fields = ['pk', 'value']
+
 
 class CommentSerializerClass(serializers.ModelSerializer):
     pk = serializers.IntegerField(read_only=True)
@@ -16,6 +16,7 @@ class CommentSerializerClass(serializers.ModelSerializer):
         fields = [
             "pk", "text"
         ]
+
 
 class VotesSerializerClass(serializers.ModelSerializer):
     class Meta:
@@ -26,16 +27,15 @@ class VotesSerializerClass(serializers.ModelSerializer):
             'user_id'
         ]
 
-    
 
 class GetPostSerializerClass(serializers.ModelSerializer):
     hashtags = HashtagSerializerClass(many=True, read_only=True)
-    comment_set = CommentSerializerClass(many=True, read_only=True)
+    comments = CommentSerializerClass(many=True, read_only=True)
 
     class Meta():
         model = BlogPost
         fields = (
-            "pk", "title", "text", "hashtags", "comment_set", "created_at"
+            "pk", "title", "text", "hashtags", "comments", "created_at"
         )
 
 
@@ -63,7 +63,6 @@ class PostSerilizerClass(serializers.ModelSerializer):
         hashtags_objects = self._get_or_create_hashtags(hashtags)
         instance.hashtags.set(hashtags_objects)
         return instance
-
 
     def to_representation(self, instance):
         return GetPostSerializerClass().to_representation(instance)

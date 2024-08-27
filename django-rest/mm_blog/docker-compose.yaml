@@ -1,4 +1,5 @@
 services:
+
   db:
     image: postgres
     volumes:
@@ -17,12 +18,28 @@ services:
       timeout: 3s
       retries: 3
 
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: mm_blog_backend
-    command: sh -c "pytest -v && python3 manage.py makemigrations --noinput && python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "pytest -v && \
+      python3 manage.py makemigrations --noinput && \
+      python3 manage.py migrate --noinput && \
+      python3 manage.py collectstatic --noinput && \
+      (python manage.py runserver 0.0.0.0:8000 &) && \
+      (celery -A mm_blog.celery worker -l INFO &) && \
+      celery -A mm_blog.celery beat -l INFO"
     restart: always
     volumes:
       - .:/app
@@ -33,5 +50,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
-  data: 
+  data:

@@ -57,7 +57,7 @@ def test_post_view_create_post():
     assert response_data['created_at'] != None, "created_at from the response was None"
     assert response_data['title'] == data['title'], "Title was not matching"
     assert [x['value'] for x in response_data['hashtags']] == data['hashtags'], "Hashtags list was not equal"
-    assert len(response_data['comment_set']) == 0, "Comments set was not empty"
+    assert len(response_data['comments']) == 0, "Comments set was not empty"
 
 
 @pytest.mark.django_db
@@ -191,7 +191,7 @@ def test_create_comment():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data)
+    response = client.patch(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data)
 
     assert response.status_code == 201
     response_data = response.json()
@@ -214,7 +214,7 @@ def test_delete_comment_by_id():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
+    response = client.patch(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
 
     assert response.status_code == 201
     response_data = response.json()
@@ -245,7 +245,7 @@ def test_update_comment():
         "text": "Create new comment"
     }
 
-    response = client.post(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
+    response = client.patch(f"/api/blog/post/{post_data['pk']}/add_comment/", comment_data, format="json")
     comment_id = response.json()['pk']
     comment_data = {
         "text": "Update comment text"
