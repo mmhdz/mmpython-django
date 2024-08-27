@@ -28,26 +28,25 @@ class PostView(ModelViewSet):
     search_fields = ['=title']
     ordering_fields = ['created_at']
 
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    @action(detail=True, methods=[HTTPMethod.POST])
+
+    @action(detail=True, methods=[HTTPMethod.PATCH], serializer_class=CommentSerializerClass, permission_classes=[IsAuthenticated])
     def add_comment(self,  request, *args, **kwargs):
-        serializer = CommentSerializerClass(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             blog_post = BlogPost.objects.get(pk=kwargs['pk'])
             serializer.save(user=request.user, post=blog_post)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=[HTTPMethod.POST])
+    @action(detail=True, methods=[HTTPMethod.PATCH])
     def add_vote(self, request, *args, **kwargs):
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
+        body = json.loads(request.body.decode('utf-8'))
         is_positive = body['is_positive']
         post = get_object_or_404(BlogPost, pk=kwargs['pk'])
         votes = Vote.objects.filter(blog_post=post, user=request.user)
@@ -70,7 +69,18 @@ class DeleteHashtagsView(DestroyAPIView):
 
 
 class CommentView(ModelViewSet):
-    serializer_class = CommentSerializerClass
     permission_classes = [IsOwner]
+    serializer_class = CommentSerializerClass
+    allowed_methods = [HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE]
     queryset = Comment.objects.all()
 
+
+class VoteOnPost(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    allowed_methods = [HTTPMethod.GET]
+    serializer_class = VotesSerializerClass
+
+    def get(self, request, **kwargs):
+        votes = get_list_or_404(Vote, blog_post__pk=kwargs['pk'])
+        serializer = self.get_serializer(votes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
