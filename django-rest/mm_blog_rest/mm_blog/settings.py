@@ -161,3 +161,7 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 
 }
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+

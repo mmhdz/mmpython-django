@@ -1,9 +1,7 @@
 import django
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group
 from enum import Enum
-
 
 
 class UserRole(Enum):
@@ -65,7 +63,7 @@ class BlogPost(models.Model):
 
 class Comment(models.Model):
     text = models.TextField(max_length=1024)
-    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE)
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self) -> str:

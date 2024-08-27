@@ -28,6 +28,8 @@ class PostView(ModelViewSet):
     search_fields = ['=title']
     ordering_fields = ['created_at']
 
+    '''Create method does not call get_object() method and is skipping the check 
+            for has_object_permission, that's why is working with IsAdminOwnerOrReadOnly permission'''
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -75,7 +77,7 @@ class CommentView(ModelViewSet):
     queryset = Comment.objects.all()
 
 
-class VoteOnPost(GenericAPIView):
+class VoteView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     allowed_methods = [HTTPMethod.GET]
     serializer_class = VotesSerializerClass
