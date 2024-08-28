@@ -22,7 +22,6 @@ class User(AbstractUser):
         else:
             return UserRole.USER
 
-
     def __str__(self):
         return f"id: {self.pk}, username: {self.username}, email: {self.email}, password: {self.password}, role: {self.role} registration_date: {self.created_at}"
 
@@ -40,7 +39,6 @@ class BlogPost(models.Model):
     text = models.TextField(max_length=1024)
     hashtags = models.ManyToManyField(Hashtag)
     created_at = models.DateTimeField(default=django.utils.timezone.now)
-    
 
     @property
     def thumbs_up(self):
@@ -69,9 +67,10 @@ class Comment(models.Model):
     def __str__(self) -> str:
         return f"pk: {self.pk}, text: {self.text}, post_id: {self.post.pk}, user_id: {self.user.pk}"
 
+
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_post_voting_user')
-    blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='blog_post_voting')
+    blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='votes')
     status = models.BooleanField()
 
     def __str__(self):
