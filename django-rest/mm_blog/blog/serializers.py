@@ -33,17 +33,17 @@ class GetPostSerializerClass(serializers.ModelSerializer):
     comments = CommentSerializerClass(many=True, read_only=True)
     votes = VotesSerializerClass(many=True, read_only=True)
 
-    class Meta():
+    class Meta:
         model = BlogPost
         fields = (
             "pk", "title", "text", "hashtags", "comments", "votes", "created_at"
         )
 
 
-class PostSerilizerClass(serializers.ModelSerializer):
+class PostSerializerClass(serializers.ModelSerializer):
     hashtags = serializers.ListField(write_only=True)
 
-    class Meta():
+    class Meta:
         model = BlogPost
         fields = (
             "title", "text", "hashtags"
@@ -70,7 +70,7 @@ class PostSerilizerClass(serializers.ModelSerializer):
 
     def _get_or_create_hashtags(self, hashtags):
         hashtags = filter_first_10_hashtags(hashtags)
-        hashtags = [Hashtag.objects.create(value=x) if not Hashtag.objects.filter(value=x).exists() 
-                            else Hashtag.objects.filter(value=x).get() for x in hashtags] 
+        hashtags = [Hashtag.objects.create(value=x) if not Hashtag.objects.filter(value=x).exists()
+                            else Hashtag.objects.filter(value=x).get() for x in hashtags]
         return hashtags
 

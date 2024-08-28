@@ -20,7 +20,7 @@ import json
 
 
 class PostView(ModelViewSet):
-    serializer_class = PostSerilizerClass
+    serializer_class = PostSerializerClass
     queryset = BlogPost.objects.all().order_by("-created_at")
     permission_classes = [IsAdminOwnerOrReadOnly]
     pagination_class = PageNumberPagination
