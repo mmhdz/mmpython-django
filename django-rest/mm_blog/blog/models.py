@@ -40,17 +40,12 @@ class BlogPost(models.Model):
     hashtags = models.ManyToManyField(Hashtag)
     created_at = models.DateTimeField(default=django.utils.timezone.now)
 
-    @property
     def thumbs_up(self):
         return self.blog_post_voting.filter(status=True).count()
-
-    @property
-    def thumbs_down(self):
-        return self.blog_post_voting.filter(status=False).count()
     
     @property
     def is_hot(self):
-        if self.thumbs_up >= 5 and self.comment_set.all().count() >= 2:
+        if self.thumbs_up() >= 5 and self.comments.all().count() >= 2:
             return True
         else:
             return False
