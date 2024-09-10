@@ -1,22 +1,24 @@
-from django.shortcuts import get_object_or_404, get_list_or_404
+import json
 from http import HTTPMethod
 
+from django.shortcuts import get_object_or_404, get_list_or_404
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import DestroyAPIView, GenericAPIView
 from rest_framework.pagination import PageNumberPagination
-
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.filters import OrderingFilter
 
-from .models import *
-from .permissions import IsOwner, IsAdminOwnerOrReadOnly
-from .serializers import *
-from .search import SearchFiltterMutipleValues
 from .filters import FiterPostByHashtagOrHot
-import json
+from .permissions import IsOwner, IsAdminOwnerOrReadOnly
+from .search import SearchFiltterMutipleValues
+from .serializers import *
+
+
+class DeleteUserView(DestroyAPIView):
+    queryset = User.objects.all()
 
 
 class PostView(ModelViewSet):

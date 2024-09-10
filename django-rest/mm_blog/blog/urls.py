@@ -24,5 +24,6 @@ urlpatterns = [
     path('post/<int:pk>/votes/', VoteView.as_view()),
     path('comment/<int:pk>', comment),
     path('hashtag/<int:pk>', DeleteHashtagsView.as_view()),
+    path("user/<int:pk>/delete", DeleteUserView.as_view()),
     path('', include(route.urls)),
 ]

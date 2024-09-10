@@ -10,6 +10,7 @@ class UserRole(Enum):
 
 
 class User(AbstractUser):
+    username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True, blank=False)
     password = models.CharField(max_length=100)
     created_at = models.DateTimeField("The date user is registered", default=django.utils.timezone.now)
@@ -34,7 +35,7 @@ class Hashtag(models.Model):
 
 
 class BlogPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     title = models.TextField(max_length=240, default=None)
     text = models.TextField(max_length=1024)
     hashtags = models.ManyToManyField(Hashtag)
@@ -57,14 +58,14 @@ class BlogPost(models.Model):
 class Comment(models.Model):
     text = models.TextField(max_length=1024)
     post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name="comments")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:
         return f"pk: {self.pk}, text: {self.text}, post_id: {self.post.pk}, user_id: {self.user.pk}"
 
 
 class Vote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_post_voting_user')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='blog_post_voting_user', null=True)
     blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='votes')
     status = models.BooleanField()
 
