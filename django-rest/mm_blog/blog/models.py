@@ -52,7 +52,7 @@ class BlogPost(models.Model):
             return False
 
     def __str__(self):
-        return f"id: {self.pk}, title: {self.title}, text: {self.text}, user_id: {self.user.pk}, hashtags: {self.hashtags.get_queryset()}"
+        return f"id: {self.pk}, title: {self.title}, text: {self.text}, hashtags: {self.hashtags.get_queryset()}"
 
 
 class Comment(models.Model):
